@@ -4,12 +4,14 @@
 
 import requests
 
+
 def progress_bar(some_iter):
     try:
         from tqdm import tqdm
         return tqdm(some_iter)
     except ModuleNotFoundError:
         return some_iter
+
 
 def download_file_from_google_drive(id, destination):
     print("Trying to fetch {}".format(destination))
