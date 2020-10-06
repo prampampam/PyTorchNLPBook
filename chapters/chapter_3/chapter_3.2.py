@@ -12,7 +12,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 from torch.utils.data import Dataset, DataLoader
-from tqdm import tqdm_notebook
+from tqdm import tqdm
 
 
 class Vocabulary(object):
@@ -262,6 +262,7 @@ class ReviewDataset(Dataset):
         with open(vectorizer_filepath) as fp:
             return ReviewVectorizer.from_serializable(json.load(fp))
 
+
     def save_vectorizer(self, vectorizer_filepath):
         """saves the vectorizer to disk using json
 
@@ -483,7 +484,7 @@ if __name__ == '__main__':
         batch_size=128,
         early_stopping_criteria=5,
         learning_rate=0.001,
-        num_epochs=100,
+        num_epochs=5,
         seed=1337,
         # Runtime options
         catch_keyboard_interrupt=True,
@@ -543,20 +544,18 @@ if __name__ == '__main__':
 
     train_state = make_train_state(args)
 
-    epoch_bar = tqdm_notebook(desc='training routine',
-                              total=args.num_epochs,
-                              position=0)
+    epoch_bar = tqdm(desc='training routine',
+                     total=args.num_epochs,
+                     position=0)
 
     dataset.set_split('train')
-    train_bar = tqdm_notebook(desc='split=train',
-                              total=dataset.get_num_batches(args.batch_size),
-                              position=1,
-                              leave=True)
+    train_bar = tqdm(desc='split=train',
+                     total=dataset.get_num_batches(args.batch_size),
+                     position=0)
     dataset.set_split('val')
-    val_bar = tqdm_notebook(desc='split=val',
-                            total=dataset.get_num_batches(args.batch_size),
-                            position=1,
-                            leave=True)
+    val_bar = tqdm(desc='split=val',
+                   total=dataset.get_num_batches(args.batch_size),
+                   position=0)
 
     try:
         for epoch_index in range(args.num_epochs):
@@ -694,7 +693,10 @@ if __name__ == '__main__':
     # Sort weights
     fc1_weights = classifier.fc1.weight.detach()[0]
     _, indices = torch.sort(fc1_weights, dim=0, descending=True)
-    indices = indices.numpy().tolist()
+    if args.cuda:
+        indices = indices.cpu().numpy().tolist()
+    else:
+        indices = indices.numpy().tolist()
 
     # Top 20 words
     print("Influential words in Positive Reviews:")
