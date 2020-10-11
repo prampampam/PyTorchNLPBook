@@ -570,6 +570,7 @@ if __name__ == '__main__':
                                                device=args.device)
             running_loss = 0.0
             running_acc = 0.0
+            # важная штука - сказали что параметры изменяемы
             classifier.train()
 
             for batch_index, batch_dict in enumerate(batch_generator):
@@ -596,7 +597,7 @@ if __name__ == '__main__':
                 # compute the accuracy
                 acc_t = compute_accuracy(y_pred, batch_dict['y_target'])
                 running_acc += (acc_t - running_acc) / (batch_index + 1)
-
+                # print(acc_t, running_acc) какая то сглаживающая тема
                 # update bar
                 train_bar.set_postfix(loss=running_loss,
                                       acc=running_acc,
@@ -615,8 +616,9 @@ if __name__ == '__main__':
                                                device=args.device)
             running_loss = 0.
             running_acc = 0.
+            # а здесь говорим что все параметры модели зафиксированы
             classifier.eval()
-
+            # почему не запилить одну проверку? Зачем скользящее среднее?
             for batch_index, batch_dict in enumerate(batch_generator):
                 # compute the output
                 y_pred = classifier(x_in=batch_dict['x_data'].float())
